@@ -1,0 +1,12 @@
+    {
+      "compilerOptions": {
+        "target": "es2020", // or a suitable ECMAScript target for your Node.js version
+        "module": "commonjs", // or "esnext" for ES Modules in Node.js
+        "outDir": "./dist", // Output directory for compiled JavaScript
+        "strict": true, // Enable strict type-checking options
+        "esModuleInterop": true, // Enable compatibility for importing CommonJS modules
+      },
+      "include": ["src/**/*.ts"], // Specify files to include in compilation
+      "exclude": ["node_modules"], // Specify files to exclude
+      "strict": true // Enable all strict type-checking options
+    }
