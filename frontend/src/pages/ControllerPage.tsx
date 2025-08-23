@@ -8,10 +8,14 @@ function ControllerPage() {
   const [d, setD] = useState(false);
   const [ws, setWs] = useState<WebSocket | null>(null);
 
-  function connectToWs() {
+  function connectWs() {
     const socket: WebSocket = new WebSocket('ws://localhost:3000/connect')
     socket.addEventListener('open', (event) => {
       console.log("Connected to WebSocket server");
+    });
+    socket.addEventListener('close', (event) => {
+      console.log("Disconnected from WebSocket server");
+      setWs(null);
     });
     socket.addEventListener('message', (event) => {
       console.log('Message from server ', event.data);
@@ -73,7 +77,7 @@ function ControllerPage() {
   }, [w, s, a, d]);
 
   useEffect(() => {
-    connectToWs();
+    connectWs();
   }, []);
 
 
