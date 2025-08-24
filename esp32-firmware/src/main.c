@@ -1,26 +1,3 @@
-// #include <stdio.h>
-// #include "esp_log.h"
-// #include "freertos/FreeRTOS.h"
-// #include "freertos/task.h"
-
-// static const char* TAG = "ESP";
-
-// void app_main() {
-//     while (true) {
-//         ESP_LOGI(TAG,"heartbeat", gen_rand_num(1, 100));
-//         vTaskDelay(3000 / portTICK_PERIOD_MS);
-//     }
-// }
-
-
-/* UART asynchronous example, that uses separate RX and TX tasks
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -31,8 +8,6 @@
 
 static const int RX_BUF_SIZE = 1024;
 
-// #define TXD_PIN (CONFIG_EXAMPLE_UART_TXD) REWROTE
-// #define RXD_PIN (CONFIG_EXAMPLE_UART_RXD) REWROTE
 #define TXD_PIN (GPIO_NUM_1) 
 #define RXD_PIN (GPIO_NUM_3) 
 #define UART_NUM (UART_NUM_1) // ran into issues trying to use uart_0
@@ -81,7 +56,7 @@ static void rx_task(void *arg)
         if (rxBytes > 0) {
             data[rxBytes] = 0;
             ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, data);
-            
+
             // echo back to sender
             sendData(RX_TASK_TAG, (const char*)data);
 
