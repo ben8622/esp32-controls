@@ -1,13 +1,16 @@
 import { SerialPort } from 'serialport';
+import { WebSocket } from 'ws';
 
 class Esp32 {
     sp: SerialPort;
+    ws: WebSocket;
     serialPath: string;
     baudRate: number;
 
-    constructor(serialPath: string, baudRate: number) {
+    constructor(serialPath: string, baudRate: number, ws: WebSocket) {
         this.serialPath  = serialPath;
         this.baudRate = baudRate;
+        this.ws = ws;
         this.sp = this.initSerialPort();
     }
 
@@ -29,6 +32,7 @@ class Esp32 {
         sp.on('close', () => {
             console.log('Serial port closed.');
             sp.destroy();
+            this.ws.close();
         });
         sp.on('data', (data) => {
             console.log('Data from ESP32: ', data.toString());
@@ -57,6 +61,10 @@ class Esp32 {
                 console.log('Message sent to ESP32: ', data);
             });
         }
+    }
+
+    setDataCallback(callback: (data: Buffer) => void) {
+        this.sp.on('data', callback);
     }
 }
 

@@ -4,8 +4,8 @@ import expressWs from 'express-ws';
 import { SerialPort } from 'serialport';
 import { Request, Response } from 'express';
 import Esp32 from './Esp32';
+import { WebSocket } from 'ws';
 
-// 
 dotenv.config({ path: '../.env' })
 
 // init express app & websockets
@@ -27,11 +27,7 @@ let controls = {
     d: false
 }
 
-// init ESP32 serial connection
-const esp32 = new Esp32(
-    process.env.SERIAL_PORT || '/dev/ttyUSB0',
-    Number(process.env.BAUD_RATE) || Number('115200')
-);
+
 function createControlBuffer() {
     // create a a buffer of 4 bytes to hold each control values
     const buffer: Buffer = Buffer.alloc(4);
@@ -47,7 +43,30 @@ function createControlBuffer() {
 app.get('/', (req: Request, res: Response) => {
     res.send('Hello World!')
 });
-app.ws('/connect', (ws: any, req: Request) => {
+app.ws('/connect', (ws: WebSocket, req: Request) => {
+    // init ESP32 serial connection
+    const esp32 = new Esp32(
+        process.env.SERIAL_PORT || '/dev/ttyUSB0',
+        Number(process.env.BAUD_RATE) || Number('115200'),
+        ws
+    );
+    const relayMessage = (data: Buffer) => {
+            ws.send(data.toString());
+    }
+    esp32.setDataCallback(relayMessage);
+
+    // setup timeoutInterval functions to send data to ESP32
+    setInterval(() => {
+        esp32.sendToSerialPort(createControlBuffer());
+    }, 1000);
+    // setInterval(() => {
+    //     // if the serial port is not open, try to reopen it
+    //     if (esp32.sp && !esp32.sp.isOpen) {
+    //         console.log('Serial port not open. Attempting to reopen...');
+    //         esp32.initSerialPort();
+    //     }
+    // }, 10000)
+
     // map incoming changes to controls object
     ws.on('message', (msg: string) => {
         const msgJson = JSON.parse(msg);
@@ -57,19 +76,11 @@ app.ws('/connect', (ws: any, req: Request) => {
     ws.on('close', () => {
         console.log('WebSocket was closed');
         controls = { ...controlsBase };
+        esp32.sp.close();
     });
 });
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 });
 
-setInterval(() => {
-    esp32.sendToSerialPort(createControlBuffer());
-}, 1000);
-setInterval(() => {
-    // if the serial port is not open, try to reopen it
-    if (esp32.sp && !esp32.sp.isOpen) {
-        console.log('Serial port not open. Attempting to reopen...');
-        esp32.initSerialPort();
-    }
-}, 10000)
+
