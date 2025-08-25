@@ -10,9 +10,7 @@ function App() {
       <div>
         <Navigation/>
       </div>
-      <div>
-        <Outlet />
-      </div>
+      <Outlet />
     </>
   )
 }

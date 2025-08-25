@@ -1,5 +1,6 @@
 import { use, useEffect, useState } from 'react';
 import '../styles/ControllerPage.css';
+import LoggingContainer from '../components/LoggingContainer';
 
 function ControllerPage() {
   const [w, setW] = useState(false);
@@ -7,18 +8,23 @@ function ControllerPage() {
   const [a, setA] = useState(false);
   const [d, setD] = useState(false);
   const [ws, setWs] = useState<WebSocket | null>(null);
+  const [logs, setLogs] = useState<string[]>([]);
 
   function connectWs() {
     const socket: WebSocket = new WebSocket('ws://localhost:3000/connect')
+
     socket.addEventListener('open', (event) => {
       console.log("Connected to WebSocket server");
+      addLog("Connected to WebSocket server");
     });
     socket.addEventListener('close', (event) => {
       console.log("Disconnected from WebSocket server");
       setWs(null);
     });
-    socket.addEventListener('message', (event) => {
+    socket.addEventListener('message', (event: MessageEvent) => {
+      console.log(`Message type: ${ws?.binaryType} | message: ${event.data}`);
       console.log('Message from server ', event.data);
+      addLog(event.data);
     });
     socket.addEventListener('error', (event) => {
       console.error("WebSocket error observed:", event);
@@ -26,6 +32,24 @@ function ControllerPage() {
     });
     setWs(socket);
   }
+
+  function addLog(message: string) {
+    const timestamp = new Date().toLocaleTimeString();
+    // const currLogs: string[] = logs;
+    // const newLogs = [...currLogs, `${timestamp}:  ${message}`];
+    // if (newLogs.length > 100) {
+    //   newLogs.shift();
+    // }
+    // setLogs(newLogs);
+    setLogs(prevLogs => {
+      const newLogs = [...prevLogs, `${timestamp}:  ${message}`];
+      if (newLogs.length > 100) {
+        newLogs.shift();
+      }
+      return newLogs;
+    });
+  }
+
 
   addEventListener("keyup", (event) => {
     if (event.key === "W" || event.key == "w") {
@@ -80,9 +104,11 @@ function ControllerPage() {
     connectWs();
   }, []);
 
+  useEffect(() => {
+  }, [ws]);
 
   return (
-    <div>
+    <div className="page">
         <div className='wsad-container'>
           <div></div>
           <div className="wsad-container-item" style={{backgroundColor: w ? 'firebrick': 'darkslategray'}}>UP</div>
@@ -95,6 +121,10 @@ function ControllerPage() {
           <div></div>
           <div className="wsad-container-item" style={{backgroundColor: s ? 'firebrick': 'darkslategray'}}>DOWN</div>
           <div></div>
+        </div>
+        <div>
+          <h2>Logs</h2>
+          <LoggingContainer logs={logs}/>
         </div>
     </div>
   );
