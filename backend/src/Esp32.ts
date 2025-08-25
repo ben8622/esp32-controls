@@ -28,10 +28,13 @@ class Esp32 {
         });
         sp.on('close', () => {
             console.log('Serial port closed.');
+            sp.destroy();
         });
         sp.on('data', (data) => {
             console.log('Data from ESP32: ', data.toString());
         });
+
+        
 
         // open the serial port after regstering event listeners
         sp.open((err) => {
@@ -40,7 +43,9 @@ class Esp32 {
             }
         });
 
-        return sp;
+        // assign the serial port instance to the class property
+        this.sp = sp;
+        return this.sp;
     }
 
     sendToSerialPort(data: Buffer) {
