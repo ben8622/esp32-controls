@@ -59,8 +59,7 @@ class Esp32 {
                 if (err) {
                     return console.error('Error on write: ', err.message);
                 }
-                console.log(`buffer length: ${data.length}, bufffer 1 byte value: ${data[0]}`);
-                // console.log('Message sent to ESP32: ', data.toString('utf-8'));
+                console.log('Message sent to ESP32: ', data);
             });
         }
     }
