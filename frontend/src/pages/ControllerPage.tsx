@@ -15,9 +15,9 @@ function ControllerPage() {
     readControlValues()
   }, [w, s, a, d]);
 
-  useEffect(() => {
-    connectWs();
-  }, []);
+  // useEffect(() => {
+  //   connectWs();
+  // }, []);
 
   useEffect(() => {
   }, [ws]);
@@ -70,10 +70,10 @@ function ControllerPage() {
 
   function readControlValues() {
     const controlMsg = {
-      up: w,
-      down: s,
-      left: a,
-      right: d
+      w: w,
+      s: s,
+      a: a,
+      d: d
     }
 
     if(ws && ws.readyState === WebSocket.OPEN) {
@@ -81,6 +81,10 @@ function ControllerPage() {
       ws.send(JSON.stringify(controlMsg));
     }
 
+  }
+
+  function connectButtonHandler() {
+    connectWs();
   }
 
   addEventListener("keyup", (event) => {
@@ -115,6 +119,7 @@ function ControllerPage() {
 
   return (
     <div className="page">
+      <div>
         <div className='wsad-container'>
           <div></div>
           <div className="wsad-container-item" style={{backgroundColor: w ? 'firebrick': 'darkslategray'}}>UP</div>
@@ -128,6 +133,10 @@ function ControllerPage() {
           <div className="wsad-container-item" style={{backgroundColor: s ? 'firebrick': 'darkslategray'}}>DOWN</div>
           <div></div>
         </div>
+        <div>
+          <button onClick={connectButtonHandler}>CONNECT TO ESP32</button>
+        </div>
+      </div>
         <div>
           {{true: <div style={{color: 'lightgreen'}}>Connected to server</div>, false: <div style={{color: 'red'}}>Disconnected from server</div> }[connected]}
           <h2>Logs</h2>

@@ -32,10 +32,12 @@ function createControlBuffer() {
     // create a a buffer of 4 bytes to hold each control values
     const buffer: Buffer = Buffer.alloc(4);
     // assign all the bytes according to the controls objects
-    buffer[0] = controls.w ? 1 : 0;
+    console.log(`controls: w: ${controls.w}, s: ${controls.s}, a: ${controls.a}, d: ${controls.d}`);
+    buffer[0] = controls.w == true ? 1 : 0;
     buffer[1] = controls.s ? 1 : 0;
     buffer[2] = controls.a ? 1 : 0;
     buffer[3] = controls.d ? 1 : 0;
+    console.log(`buffer length: ${buffer.length}, bufffer 1 byte value: ${buffer[0]}`);
     return buffer;
 }
 
@@ -70,7 +72,9 @@ app.ws('/connect', (ws: WebSocket, req: Request) => {
     // map incoming changes to controls object
     ws.on('message', (msg: string) => {
         const msgJson = JSON.parse(msg);
+        console.log('Controls JSON before spread:', controls);
         controls = { ...msgJson }
+        console.log('Controls JSON after spread:', controls);
     });
     // reset controls on disconnect to base values
     ws.on('close', () => {
