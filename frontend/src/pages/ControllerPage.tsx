@@ -7,19 +7,38 @@ function ControllerPage() {
   const [s, setS] = useState(false);
   const [a, setA] = useState(false);
   const [d, setD] = useState(false);
+  const [connected, setConnected] = useState(false);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
+
+  useEffect(() => {
+    readControlValues()
+  }, [w, s, a, d]);
+
+  useEffect(() => {
+    connectWs();
+  }, []);
+
+  useEffect(() => {
+  }, [ws]);
+
+  useEffect(() => {
+  }, [connected]);
 
   function connectWs() {
     const socket: WebSocket = new WebSocket('ws://localhost:3000/connect')
 
     socket.addEventListener('open', (event) => {
       console.log("Connected to WebSocket server");
+      setWs(socket);
+      setConnected(true);
       addLog("Connected to WebSocket server");
     });
     socket.addEventListener('close', (event) => {
       console.log("Disconnected from WebSocket server");
       setWs(null);
+      setConnected(false);
+      addLog("Disconnected from WebSocket server");
     });
     socket.addEventListener('message', (event: MessageEvent) => {
       console.log(`Message type: ${ws?.binaryType} | message: ${event.data}`);
@@ -30,7 +49,6 @@ function ControllerPage() {
       console.error("WebSocket error observed:", event);
       alert("WebSocket error observed. Is the backend server running? Try refreshing the page.");
     });
-    setWs(socket);
   }
 
   function addLog(message: string) {
@@ -50,6 +68,20 @@ function ControllerPage() {
     });
   }
 
+  function readControlValues() {
+    const controlMsg = {
+      up: w,
+      down: s,
+      left: a,
+      right: d
+    }
+
+    if(ws && ws.readyState === WebSocket.OPEN) {
+      console.debug("Sending via WS:", controlMsg);
+      ws.send(JSON.stringify(controlMsg));
+    }
+
+  }
 
   addEventListener("keyup", (event) => {
     if (event.key === "W" || event.key == "w") {
@@ -81,32 +113,6 @@ function ControllerPage() {
     }
   })
 
-  function readControlValues() {
-    const controlMsg = {
-      up: w,
-      down: s,
-      left: a,
-      right: d
-    }
-
-    if(ws && ws.readyState === WebSocket.OPEN) {
-      console.debug("Sending via WS:", controlMsg);
-      ws.send(JSON.stringify(controlMsg));
-    }
-
-  }
-
-  useEffect(() => {
-    readControlValues()
-  }, [w, s, a, d]);
-
-  useEffect(() => {
-    connectWs();
-  }, []);
-
-  useEffect(() => {
-  }, [ws]);
-
   return (
     <div className="page">
         <div className='wsad-container'>
@@ -123,6 +129,7 @@ function ControllerPage() {
           <div></div>
         </div>
         <div>
+          {{true: <div style={{color: 'lightgreen'}}>Connected to server</div>, false: <div style={{color: 'red'}}>Disconnected from server</div> }[connected]}
           <h2>Logs</h2>
           <LoggingContainer logs={logs}/>
         </div>

@@ -36,14 +36,15 @@ class Esp32 {
         });
         sp.on('data', (data) => {
             console.log('Data from ESP32: ', data.toString());
-        });
-
-        
+        });     
 
         // open the serial port after regstering event listeners
         sp.open((err) => {
+            // if we error out opening the port, notify the websocket and close it
             if (err) {
-                return console.error('Error opening serial port: ', err.message);
+                console.error('Error opening serial port: ', err.message);
+                this.ws.send('Error: Cannot connect to ESP32. Is it connected?');
+                this.ws.close();
             }
         });
 
@@ -65,6 +66,10 @@ class Esp32 {
 
     setDataCallback(callback: (data: Buffer) => void) {
         this.sp.on('data', callback);
+    }
+
+    setErrorCallback(callback: (err: Error) => void) {
+        this.sp.on('error', callback);
     }
 }
 

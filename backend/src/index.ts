@@ -53,19 +53,19 @@ app.ws('/connect', (ws: WebSocket, req: Request) => {
     const relayMessage = (data: Buffer) => {
             ws.send(data.toString());
     }
+    const cannotConnect = (err: Error) => {
+        console.error('Serial port error: ', err.message);
+        ws.send('Error: Cannot connect to ESP32. Is it connected?');
+        ws.close();
+    }
     esp32.setDataCallback(relayMessage);
+    esp32.setErrorCallback(cannotConnect);
+
 
     // setup timeoutInterval functions to send data to ESP32
     setInterval(() => {
         esp32.sendToSerialPort(createControlBuffer());
     }, 1000);
-    // setInterval(() => {
-    //     // if the serial port is not open, try to reopen it
-    //     if (esp32.sp && !esp32.sp.isOpen) {
-    //         console.log('Serial port not open. Attempting to reopen...');
-    //         esp32.initSerialPort();
-    //     }
-    // }, 10000)
 
     // map incoming changes to controls object
     ws.on('message', (msg: string) => {
@@ -78,6 +78,7 @@ app.ws('/connect', (ws: WebSocket, req: Request) => {
         controls = { ...controlsBase };
         esp32.sp.close();
     });
+
 });
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
