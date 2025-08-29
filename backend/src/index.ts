@@ -51,7 +51,8 @@ app.ws('/connect', (ws: WebSocket, req: Request) => {
         ws
     );
     const relayMessage = (data: Buffer) => {
-            ws.send(data.toString());
+            console.log('Relaying message from ESP32 to client: ', data);
+            ws.send(data);
     }
     const cannotConnect = (err: Error) => {
         console.error('Serial port error: ', err.message);

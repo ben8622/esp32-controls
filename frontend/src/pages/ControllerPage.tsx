@@ -15,10 +15,6 @@ function ControllerPage() {
     readControlValues()
   }, [w, s, a, d]);
 
-  // useEffect(() => {
-  //   connectWs();
-  // }, []);
-
   useEffect(() => {
   }, [ws]);
 
@@ -27,6 +23,8 @@ function ControllerPage() {
 
   function connectWs() {
     const socket: WebSocket = new WebSocket('ws://localhost:3000/connect')
+    
+    socket.binaryType = 'arraybuffer';
 
     socket.addEventListener('open', (event) => {
       console.log("Connected to WebSocket server");
@@ -41,9 +39,10 @@ function ControllerPage() {
       addLog("Disconnected from WebSocket server");
     });
     socket.addEventListener('message', (event: MessageEvent) => {
-      console.log(`Message type: ${ws?.binaryType} | message: ${event.data}`);
-      console.log('Message from server ', event.data);
-      addLog(event.data);
+      const buffer: Uint8Array = new Uint8Array(event.data);
+      const byteString = `x${buffer[0]}x${buffer[1]}x${buffer[2]}x${buffer[3]}`;
+      console.log('Message from server ', byteString);
+      addLog(byteString);
     });
     socket.addEventListener('error', (event) => {
       console.error("WebSocket error observed:", event);
@@ -53,12 +52,6 @@ function ControllerPage() {
 
   function addLog(message: string) {
     const timestamp = new Date().toLocaleTimeString();
-    // const currLogs: string[] = logs;
-    // const newLogs = [...currLogs, `${timestamp}:  ${message}`];
-    // if (newLogs.length > 100) {
-    //   newLogs.shift();
-    // }
-    // setLogs(newLogs);
     setLogs(prevLogs => {
       const newLogs = [...prevLogs, `${timestamp}:  ${message}`];
       if (newLogs.length > 100) {

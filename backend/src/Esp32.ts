@@ -34,9 +34,9 @@ class Esp32 {
             sp.destroy();
             this.ws.close();
         });
-        sp.on('data', (data) => {
-            console.log('Data from ESP32: ', data);
-        });     
+        // sp.on('data', (data) => {
+        //     console.log('Data from ESP32: ', data);
+        // });     
 
         // open the serial port after regstering event listeners
         sp.open((err) => {
