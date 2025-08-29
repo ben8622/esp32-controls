@@ -84,9 +84,8 @@ void uart_init(void)
     ESP_ERROR_CHECK(uart_set_pin(UART_NUM, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
 }
 
-int txDataUart(const char* logName, const char* data)
+int txDataUart(const char* logName, const uint8_t* data, const int len)
 {
-    const int len = strlen(data);
     const int txBytes = uart_write_bytes(UART_NUM_1, data, len);
     ESP_LOGI(logName, "Wrote %d bytes", txBytes);
     return txBytes;
@@ -97,7 +96,9 @@ static void tx_task(void *arg)
     static const char *TX_TASK_TAG = "TX_TASK";
     esp_log_level_set(TX_TASK_TAG, ESP_LOG_INFO);
     while (1) {
-        txDataUart(TX_TASK_TAG, "Hello world");
+        const char* message = "Hello world";
+        const uint8_t* buffer = (const uint8_t*)message;
+        txDataUart(TX_TASK_TAG, buffer, strlen(message));
         vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
 }
@@ -111,10 +112,10 @@ static void rx_task(void *arg)
         const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE, 1000 / portTICK_PERIOD_MS);
         if (rxBytes > 0) {
             data[rxBytes] = 0;
-            ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, data);
+            ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, (char*)data);
 
             // echo back to sender
-            txDataUart(RX_TASK_TAG, (const char*)data);
+            txDataUart(RX_TASK_TAG, data, rxBytes);
 
             // transmit over ESPNOW
             esp_err_t err = esp_now_send(rcvr_esp_mac, data, rxBytes);
