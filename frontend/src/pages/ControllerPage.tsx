@@ -41,7 +41,6 @@ function ControllerPage() {
     socket.addEventListener('message', (event: MessageEvent) => {
       const buffer: Uint8Array = new Uint8Array(event.data);
       const byteString = `x${buffer[0]}x${buffer[1]}x${buffer[2]}x${buffer[3]}`;
-      console.log('Message from server ', byteString);
       addLog(byteString);
     });
     socket.addEventListener('error', (event) => {
@@ -118,12 +117,12 @@ function ControllerPage() {
           <div className="wsad-container-item" style={{backgroundColor: w ? 'firebrick': 'darkslategray'}}>UP</div>
           <div></div>
 
-          <div className="wsad-container-item" style={{backgroundColor: a ? 'firebrick': 'darkslategray'}}>LEFT</div>
+          <div className="wsad-container-item" style={{backgroundColor: a ? 'blue': 'darkslategray'}}>LEFT</div>
           <div></div>
-          <div className="wsad-container-item" style={{backgroundColor: d ? 'firebrick': 'darkslategray'}}>RIGHT</div>
+          <div className="wsad-container-item" style={{backgroundColor: d ? 'beige': 'darkslategray', color: d ? 'black': 'white'}}>RIGHT</div>
 
           <div></div>
-          <div className="wsad-container-item" style={{backgroundColor: s ? 'firebrick': 'darkslategray'}}>DOWN</div>
+          <div className="wsad-container-item" style={{backgroundColor: s ? 'green': 'darkslategray'}}>DOWN</div>
           <div></div>
         </div>
         <div>
